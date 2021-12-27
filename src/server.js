@@ -15,9 +15,16 @@ app.get("/*", (_, res) => res.redirect("/"));
 
 const handleListen = () => console.log(`Listening on http://localhost:3000`);
 
-const server = http.createServer(app);
-const wss = new WebSocket.Server({ server });
+const server = http.createServer(app); // node js
 
-// Put all your backend code here.
+const wss = new WebSocket.Server({ server }); // 이렇게 하면 같은 서버에서 둘다 돌릴 수 있음
+// http 서버 위에 ws를 올림
+
+const handleConnection = (socket) => {
+  // front에서 전달한 socket을 파라미터로 받음
+  console.log(socket);
+};
+
+wss.on("connection", handleConnection);
 
 server.listen(process.env.PORT, handleListen);
