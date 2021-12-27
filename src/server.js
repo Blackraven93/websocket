@@ -20,11 +20,14 @@ const server = http.createServer(app); // node js
 const wss = new WebSocket.Server({ server }); // 이렇게 하면 같은 서버에서 둘다 돌릴 수 있음
 // http 서버 위에 ws를 올림
 
-const handleConnection = (socket) => {
+wss.on("connection", (socket) => {
   // front에서 전달한 socket을 파라미터로 받음
-  console.log(socket);
-};
-
-wss.on("connection", handleConnection);
+  console.log("Connected to Browser ✅");
+  socket.on("close", () => console.log("Disconnected from the Browser ❌"));
+  socket.on("message", (message) => {
+    console.log(message.toString());
+  });
+  socket.send("hello"); // 연결이 끈어 졌을 때 보내진다!!
+});
 
 server.listen(process.env.PORT, handleListen);
