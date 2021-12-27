@@ -20,13 +20,28 @@ const server = http.createServer(app); // node js
 const wss = new WebSocket.Server({ server }); // 이렇게 하면 같은 서버에서 둘다 돌릴 수 있음
 // http 서버 위에 ws를 올림
 
+const socketsDb = [];
+
 wss.on("connection", (socket) => {
+  socketsDb.push(socket);
+  socket["nickname"] = "Anon";
   // front에서 전달한 socket을 파라미터로 받음
   console.log("Connected to Browser ✅");
   socket.on("close", () => console.log("Disconnected from the Browser ❌"));
-  socket.on("message", (message) => {
-    console.log(message.toString());
+  socket.on("message", (msg) => {
+    const message = JSON.parse(msg);
+    switch (message.type) {
+      case "new_message":
+        socketsDb.forEach((aSocket) =>
+          aSocket.send(`${socket.nickname} : ${message.payload}`)
+        );
+        break; // break 사용 안하면 닉네임이 바뀜!
+      case "nickname":
+        socket["nickname"] = message.payload;
+        break;
+    }
   });
+
   socket.send("hello"); // 연결이 끈어 졌을 때 보내진다!!
 });
 
