@@ -10,8 +10,10 @@ html(lang="ko")
         header 
             h1 Raven 
         main 
-        
-        
+            div#welcome
+                form
+                    input(placeholder="Room name", required, type="text")
+                    button Enter Room
         script(src="/socket.io/socket.io.js") 
         script(src="../public/app.js") 
         //- 왜 /public/app.js를 하면
