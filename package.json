@@ -5,6 +5,7 @@
   "repository": "https://github.com/Blackraven93/websocket.git",
   "author": "곽세진_2004_anl <Reblackraven@Gmail.com>",
   "license": "MIT",
+  "homepage": ".",
   "scripts": {
     "dev": "nodemon"
   },
