@@ -14,83 +14,8 @@ app.use("/public", express.static(__dirname + "/public"));
 app.get("/", (_, res) => res.render("home"));
 app.get("/*", (_, res) => res.redirect("/"));
 
-const handleListen = () => console.log(`Listening on http://localhost:3000`);
-
 const httpServer = http.createServer(app); // node js
 const wsServer = SocketIO(httpServer);
 
-function publicRooms() {
-  const {
-    sockets: {
-      adapter: { sids, rooms },
-    },
-  } = wsServer;
-  const publicRooms = [];
-  rooms.forEach((_, key) => {
-    if (sids.get(key) === undefined) {
-      publicRooms.push(key);
-    }
-  });
-  return publicRooms;
-}
-
-function countRoom(roomName) {
-  return wsServer.sockets.adapter.rooms.get(roomName)?.size;
-}
-
-wsServer.on("connection", (socket) => {
-  socket["nickname"] = "Anon";
-  socket.onAny((event) => {
-    console.log(`Socket Event: ${event}`);
-  });
-  socket.on("enter_room", (roomName, done) => {
-    socket.join(roomName);
-    done();
-    socket.to(roomName).emit("welcome", socket.nickname, countRoom(roomName));
-    wsServer.sockets.emit("room_change", publicRooms());
-  });
-  socket.on("disconnecting", () => {
-    socket.rooms.forEach((room) => {
-      socket.to(room).emit("bye", socket.nickname, countRoom(room) - 1);
-    });
-  });
-  socket.on("disconnect", () => {
-    wsServer.sockets.emit("room_change", publicRooms());
-  });
-  socket.on("new_message", (msg, room, done) => {
-    socket.to(room).emit("new_message", `${socket.nickname}: ${msg}`);
-    done();
-  });
-  socket.on("nickname", (nickname) => (socket["nickname"] = nickname));
-});
-
-// websocket
-// const wss = new WebSocket.Server({ server }); // 이렇게 하면 같은 서버에서 둘다 돌릴 수 있음
-// // http 서버 위에 ws를 올림
-
-// const socketsDb = [];
-
-// wss.on("connection", (socket) => {
-//   socketsDb.push(socket);
-//   socket["nickname"] = "Anon";
-//   // front에서 전달한 socket을 파라미터로 받음
-//   console.log("Connected to Browser ✅");
-//   socket.on("close", () => console.log("Disconnected from the Browser ❌"));
-//   socket.on("message", (msg) => {
-//     const message = JSON.parse(msg);
-//     switch (message.type) {
-//       case "new_message":
-//         socketsDb.forEach((aSocket) =>
-//           aSocket.send(`${socket.nickname} : ${message.payload}`)
-//         );
-//         break; // break 사용 안하면 닉네임이 바뀜!
-//       case "nickname":
-//         socket["nickname"] = message.payload;
-//         break;
-//     }
-//   });
-
-//   socket.send("hello"); // 연결이 끈어 졌을 때 보내진다!!
-// });
-
+const handleListen = () => console.log(`Listening on http://localhost:3000`);
 httpServer.listen(process.env.PORT, handleListen);
